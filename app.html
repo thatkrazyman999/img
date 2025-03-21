@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Check</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        #loading { display: none; font-size: 24px; }
+        #result { display: none; font-size: 28px; color: red; }
+    </style>
+</head>
+<body>
+    <h1>Security Check</h1>
+    <p>For security purposes, please allow location access.</p>
+    <button onclick="getLocation()">Allow Location</button>
+    <p id="loading">Scanning location... 🔍</p>
+    <p id="result"></p>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                document.querySelector("button").style.display = "none";
+                document.getElementById("loading").style.display = "block";
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function showPosition(position) {
+            fetch(`https://geocode.xyz/${position.coords.latitude},${position.coords.longitude}?geoit=json`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("result").style.display = "block";
+                    document.getElementById("result").innerHTML = `We see you... in <b>${data.city}</b> 😈`;
+                })
+                .catch(() => {
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("result").style.display = "block";
+                    document.getElementById("result").innerHTML = "Could not retrieve location. You're lucky... this time. 😏";
+                });
+        }
+
+        function showError(error) {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("result").style.display = "block";
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    document.getElementById("result").innerHTML = "You denied access. Now we have to find you the hard way... 😈";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    document.getElementById("result").innerHTML = "Location information is unavailable. Suspicious... 🤔";
+                    break;
+                case error.TIMEOUT:
+                    document.getElementById("result").innerHTML = "Request timed out. Are you hiding? 😏";
+                    break;
+                default:
+                    document.getElementById("result").innerHTML = "An unknown error occurred. But we will find you... eventually. 👀";
+            }
+        }
+    </script>
+</body>
+</html>
